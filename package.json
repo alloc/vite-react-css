@@ -1,0 +1,33 @@
+{
+  "name": "vite-react-css",
+  "version": "0.0.0",
+  "repository": "alloc/vite-react-css",
+  "license": "MIT",
+  "main": "./dist/plugin.js",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "debug": "^4.3.2"
+  },
+  "devDependencies": {
+    "@alloc/prettier-config": "^1.0.0",
+    "@types/debug": "^4.1.7",
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@vitejs/plugin-react": "*",
+    "typescript": "^4.4.4",
+    "vite": "*"
+  },
+  "prettier": "@alloc/prettier-config",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "plugin",
+    "react",
+    "scoped",
+    "css",
+    "shadow",
+    "dom"
+  ]
+}
