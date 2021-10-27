@@ -3,6 +3,7 @@
     "composite": true,
     "declaration": true,
     "jsx": "preserve",
+    "lib": ["dom", "esnext"],
     "module": "esnext",
     "moduleResolution": "node",
     "outDir": "../dist/client",
