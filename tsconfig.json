@@ -1,4 +1,13 @@
 {
-  "files": [],
-  "references": [{ "path": "./src" }, { "path": "./client" }]
+  "include": ["src"],
+  "exclude": ["**/*.spec.*"],
+  "compilerOptions": {
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2019"
+  }
 }
