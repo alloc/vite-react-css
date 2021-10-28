@@ -130,7 +130,12 @@ function coerceToComponent(expr: babel.NodePath): babel.NodePath | undefined {
   if (expr.isVariableDeclaration()) {
     return coerceToComponent(expr.get('declarations')[0].get('init') as any)
   }
-  if (expr.isIdentifier()) {
+  if (expr.isCallExpression()) {
+    for (const arg of expr.get('arguments')) {
+      const component = coerceToComponent(arg)
+      if (component) return component
+    }
+  } else if (expr.isIdentifier()) {
     const binding = expr.scope.getBinding(expr.node.name)
     if (binding) {
       if (isFunction(binding.path)) {
