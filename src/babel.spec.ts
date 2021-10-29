@@ -108,7 +108,26 @@ describe('getBabelPlugin', () => {
             <span>Hello world</span>
           ))
         `,
+        transform`
+          export function Foo() {
+            return <span>Hello world</span>
+          }
+        `,
       ]).toMatchSnapshot()
     })
+  })
+
+  it('skips nested functions', () => {
+    expect([
+      transform`
+        export function Foo(props) {
+          return <>
+            {props.items.map((item, i) => {
+              return <span key={i}>{item}</span>
+            })}
+          </>
+        }
+      `,
+    ]).toMatchSnapshot()
   })
 })

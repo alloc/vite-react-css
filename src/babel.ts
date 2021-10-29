@@ -121,6 +121,7 @@ export const getBabelPlugin =
             } else {
               path.traverse({
                 JSXElement: transformElement,
+                Function: path => path.skip(),
               })
             }
           }
@@ -130,6 +131,7 @@ export const getBabelPlugin =
           } else {
             mainComponent.traverse({
               ReturnStatement: transformReturn,
+              Function: path => path.skip(),
             })
           }
 
