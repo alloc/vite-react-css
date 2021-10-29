@@ -121,6 +121,20 @@ describe('getBabelPlugin', () => {
     expect([
       transform`
         export function Foo(props) {
+          return <div>
+            {props.items.map((item, i) => {
+              return <span key={i}>{item}</span>
+            })}
+          </div>
+        }
+      `,
+    ]).toMatchSnapshot()
+  })
+
+  it('replaces JSX fragments', () => {
+    expect([
+      transform`
+        export function Foo(props) {
           return <>
             {props.items.map((item, i) => {
               return <span key={i}>{item}</span>

@@ -68,6 +68,18 @@ export const getBabelPlugin =
                   )
                 )
 
+          const getScopeWrapper = (children: t.JSXElement['children']) =>
+            t.jsxElement(
+              t.jsxOpeningElement(t.jsxIdentifier(scopeType), [
+                t.jsxAttribute(
+                  t.jsxIdentifier('className'),
+                  t.stringLiteral(scopeClasses)
+                ),
+              ]),
+              t.jsxClosingElement(t.jsxIdentifier(scopeType)),
+              children
+            )
+
           let transformed = false
           const transformReturn = (path: babel.NodePath) => {
             const transformElement = (
@@ -102,23 +114,29 @@ export const getBabelPlugin =
               } else {
                 transformed = true
                 jsxElem.replaceWith(
-                  t.jsxElement(
-                    t.jsxOpeningElement(t.jsxIdentifier(scopeType), [
-                      t.jsxAttribute(
-                        t.jsxIdentifier('className'),
-                        t.stringLiteral(scopeClasses)
-                      ),
-                    ]),
-                    t.jsxClosingElement(t.jsxIdentifier(scopeType)),
-                    [t.cloneNode(jsxElem.node)]
-                  )
+                  getScopeWrapper([t.cloneNode(jsxElem.node)])
                 )
               }
             }
-            if (path.isJSXElement()) {
+
+            const transformFragment = (
+              jsxFragment: babel.NodePath<t.JSXFragment>
+            ) => {
+              jsxFragment.skip()
+              jsxFragment.replaceWith(
+                getScopeWrapper(
+                  jsxFragment.node.children.map(child => t.cloneNode(child))
+                )
+              )
+            }
+
+            if (path.isJSXFragment()) {
+              transformFragment(path)
+            } else if (path.isJSXElement()) {
               transformElement(path)
             } else {
               path.traverse({
+                JSXFragment: transformFragment,
                 JSXElement: transformElement,
                 Function: path => path.skip(),
               })

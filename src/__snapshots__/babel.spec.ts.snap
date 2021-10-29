@@ -48,6 +48,19 @@ export default Foo;",
 ]
 `;
 
+exports[`getBabelPlugin replaces JSX fragments 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export function Foo(props) {
+  return <div className=\\"scoped s0c05f480\\">
+            {props.items.map((item, i) => {
+      return <span key={i}>{item}</span>;
+    })}
+          </div>;
+}",
+]
+`;
+
 exports[`getBabelPlugin scopeTags adds a className attribute otherwise 1`] = `
 Array [
   "import \\"./Foo.css?scoped=s0c05f480\\";
@@ -77,11 +90,11 @@ exports[`getBabelPlugin skips nested functions 1`] = `
 Array [
   "import \\"./Foo.css?scoped=s0c05f480\\";
 export function Foo(props) {
-  return <>
+  return <div className=\\"scoped s0c05f480\\"><div>
             {props.items.map((item, i) => {
-      return <span key={i}>{item}</span>;
-    })}
-          </>;
+        return <span key={i}>{item}</span>;
+      })}
+          </div></div>;
 }",
 ]
 `;
