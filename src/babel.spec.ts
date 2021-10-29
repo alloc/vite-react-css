@@ -18,7 +18,9 @@ describe('getBabelPlugin', () => {
       expect([
         transform`
           export default () => (
-            <Box className="Foo" />
+            <Box className="Foo">
+              <span>Hello world</span>
+            </Box>
           )
         `,
         transform`

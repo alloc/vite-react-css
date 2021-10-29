@@ -61,7 +61,9 @@ export default (() => <Box {...props} className=\\"scoped s0c05f480\\" />);",
 exports[`getBabelPlugin scopeTags mutates the className attribute if one exists 1`] = `
 Array [
   "import \\"./Foo.css?scoped=s0c05f480\\";
-export default (() => <Box className=\\"Foo scoped s0c05f480\\" />);",
+export default (() => <Box className=\\"Foo scoped s0c05f480\\">
+              <span>Hello world</span>
+            </Box>);",
   "import \\"./Foo.css?scoped=s0c05f480\\";
 export default (props => <Box className={(props.className || \\"\\") + \\" scoped s0c05f480\\"} />);",
 ]

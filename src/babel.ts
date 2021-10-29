@@ -70,25 +70,28 @@ export const getBabelPlugin =
                 )
 
           let transformed = false
-          const transformJSX = (path: babel.NodePath) =>
-            path.traverse({
-              JSXOpeningElement(jsxOpenElem) {
-                const jsxElem =
-                  jsxOpenElem.parentPath as babel.NodePath<babel.types.JSXElement>
-                jsxElem.skip()
+          const transformReturn = (path: babel.NodePath) => {
+            const transformElement = (
+              jsxElem: babel.NodePath<babel.types.JSXElement>
+            ) => {
+              // Only transform root-level JSX elements.
+              jsxElem.skip()
 
-                const tagName = jsxOpenElem.get('name').toString()
-                if (scopeTags.includes(tagName)) {
-                  const { attributes } = jsxOpenElem.node
-                  for (let i = 0; i < attributes.length; i++) {
-                    const attr = attributes[i]
-                    if (!t.isJSXAttribute(attr)) continue
-                    if (t.isJSXIdentifier(attr.name, { name: 'className' })) {
-                      transformed = true
-                      attr.value = addScopeClasses(attr.value as any)
-                      return
-                    }
+              const jsxOpenElem = jsxElem.get('openingElement')
+              const tagName = jsxOpenElem.get('name').toString()
+
+              if (scopeTags.includes(tagName)) {
+                const { attributes } = jsxOpenElem.node
+                for (let i = 0; i < attributes.length; i++) {
+                  const attr = attributes[i]
+                  if (!t.isJSXAttribute(attr)) continue
+                  if (t.isJSXIdentifier(attr.name, { name: 'className' })) {
+                    transformed = true
+                    attr.value = addScopeClasses(attr.value as any)
+                    break
                   }
+                }
+                if (!transformed) {
                   transformed = true
                   attributes.push(
                     t.jsxAttribute(
@@ -96,29 +99,37 @@ export const getBabelPlugin =
                       t.stringLiteral(scopeClasses)
                     )
                   )
-                } else {
-                  transformed = true
-                  jsxElem.replaceWith(
-                    t.jsxElement(
-                      t.jsxOpeningElement(t.jsxIdentifier(scopeType), [
-                        t.jsxAttribute(
-                          t.jsxIdentifier('className'),
-                          t.stringLiteral(scopeClasses)
-                        ),
-                      ]),
-                      t.jsxClosingElement(t.jsxIdentifier(scopeType)),
-                      [t.cloneNode(jsxElem.node)]
-                    )
-                  )
                 }
-              },
-            })
+              } else {
+                transformed = true
+                jsxElem.replaceWith(
+                  t.jsxElement(
+                    t.jsxOpeningElement(t.jsxIdentifier(scopeType), [
+                      t.jsxAttribute(
+                        t.jsxIdentifier('className'),
+                        t.stringLiteral(scopeClasses)
+                      ),
+                    ]),
+                    t.jsxClosingElement(t.jsxIdentifier(scopeType)),
+                    [t.cloneNode(jsxElem.node)]
+                  )
+                )
+              }
+            }
+            if (path.isJSXElement()) {
+              transformElement(path)
+            } else {
+              path.traverse({
+                JSXElement: transformElement,
+              })
+            }
+          }
 
           if (isArrowExpression(mainComponent)) {
-            transformJSX(mainComponent.get('body'))
+            transformReturn(mainComponent.get('body'))
           } else {
             mainComponent.traverse({
-              ReturnStatement: transformJSX,
+              ReturnStatement: transformReturn,
             })
           }
 
