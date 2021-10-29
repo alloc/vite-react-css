@@ -1,8 +1,10 @@
+import * as fs from 'fs'
 import * as path from 'path'
 import * as vite from 'vite'
 import '@vitejs/plugin-react'
 import { getPostcssPlugin } from './postcss'
 import { getBabelPlugin } from './babel'
+import { cacheOnDemand } from './utils'
 
 type Options = {
   /**
@@ -33,7 +35,7 @@ export default (options: Options = {}): vite.Plugin => {
     options.scopeTag || 'div',
     options.scopeTags || [],
     () => projectRoot,
-    dirCache
+    cacheOnDemand(dirCache, dir => fs.readdirSync(dir))
   )
 
   return {

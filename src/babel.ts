@@ -1,4 +1,3 @@
-import * as fs from 'fs'
 import * as path from 'path'
 import md5Hex = require('md5-hex')
 import { debug } from './debug'
@@ -146,7 +145,7 @@ function getStyleFilename(
   if (reactExtensionRE.test(ext)) {
     const dir = path.dirname(filename)
     try {
-      const files = dirCache[dir] || (dirCache[dir] = fs.readdirSync(dir))
+      const files = dirCache[dir]
       const name = path.basename(filename, ext)
       const match = files.find(
         file =>
