@@ -5,7 +5,7 @@ import { extensionRE, reactExtensionRE, styleExtensionRE } from './regex'
 
 export const getBabelPlugin =
   (
-    scopeTag: string,
+    scopeType: string,
     scopeTags: string[],
     getProjectRoot: () => string,
     dirCache: Record<string, string[]>
@@ -100,13 +100,13 @@ export const getBabelPlugin =
                   transformed = true
                   jsxElem.replaceWith(
                     t.jsxElement(
-                      t.jsxOpeningElement(t.jsxIdentifier(scopeTag), [
+                      t.jsxOpeningElement(t.jsxIdentifier(scopeType), [
                         t.jsxAttribute(
                           t.jsxIdentifier('className'),
                           t.stringLiteral(scopeClasses)
                         ),
                       ]),
-                      t.jsxClosingElement(t.jsxIdentifier(scopeTag)),
+                      t.jsxClosingElement(t.jsxIdentifier(scopeType)),
                       [t.cloneNode(jsxElem.node)]
                     )
                   )

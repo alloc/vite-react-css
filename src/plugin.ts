@@ -13,7 +13,7 @@ type Options = {
    *
    * @default "div"
    */
-  scopeTag?: keyof JSX.IntrinsicElements
+  scopeType?: keyof JSX.IntrinsicElements
   /**
    * If the main component in a JSX or TSX module returns a JSX element
    * with a tag name in the given `scopeTags` array, its `className` prop
@@ -32,7 +32,7 @@ export default (options: Options = {}): vite.Plugin => {
 
   const postcssPlugin = getPostcssPlugin()
   const babelPlugin = getBabelPlugin(
-    options.scopeTag || 'div',
+    options.scopeType || 'div',
     options.scopeTags || [],
     () => projectRoot,
     cacheOnDemand(dirCache, dir => fs.readdirSync(dir))
