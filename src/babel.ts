@@ -41,42 +41,47 @@ export const getBabelPlugin =
             t.importDeclaration([], t.stringLiteral(styleId))
           )
 
-          const defaultComponent = coerceToComponent(
+          const mainComponent = coerceToComponent(
             defaultExport.get('declaration')
           )
 
-          if (!defaultComponent) {
-            return debug(`Missing default component: "${state.filename}"`)
+          if (!mainComponent) {
+            return debug(`Main component not found: "${state.filename}"`)
           }
 
           let transformed = false
-          defaultComponent.traverse({
-            ReturnStatement(returnStmt) {
-              returnStmt.traverse({
-                JSXElement(jsxElem) {
-                  transformed = true
-                  jsxElem.skip()
-                  jsxElem.replaceWith(
-                    t.jsxElement(
-                      t.jsxOpeningElement(t.jsxIdentifier(scopeTag), [
-                        t.jsxAttribute(
-                          t.jsxIdentifier('className'),
-                          t.stringLiteral(`scoped ${scopeId}`)
-                        ),
-                      ]),
-                      t.jsxClosingElement(t.jsxIdentifier(scopeTag)),
-                      [t.cloneNode(jsxElem.node)]
-                    )
+          const transformJSX = (path: babel.NodePath) =>
+            path.traverse({
+              JSXElement(jsxElem) {
+                transformed = true
+                jsxElem.skip()
+                jsxElem.replaceWith(
+                  t.jsxElement(
+                    t.jsxOpeningElement(t.jsxIdentifier(scopeTag), [
+                      t.jsxAttribute(
+                        t.jsxIdentifier('className'),
+                        t.stringLiteral(`scoped ${scopeId}`)
+                      ),
+                    ]),
+                    t.jsxClosingElement(t.jsxIdentifier(scopeTag)),
+                    [t.cloneNode(jsxElem.node)]
                   )
-                },
-              })
-            },
-          })
+                )
+              },
+            })
+
+          if (mainComponent.isArrowFunctionExpression({ expression: true })) {
+            transformJSX(mainComponent.get('body'))
+          } else {
+            mainComponent.traverse({
+              ReturnStatement: transformJSX,
+            })
+          }
 
           debug(
             transformed
               ? `Transformed file: "${state.filename}"`
-              : `Default component does not return JSX: "${state.filename}"`
+              : `Main component does not return JSX: "${state.filename}"`
           )
         } else {
           debug(`Missing default export: "${state.filename}"`)
