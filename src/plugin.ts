@@ -12,6 +12,16 @@ type Options = {
    * @default "div"
    */
   scopeTag?: keyof JSX.IntrinsicElements
+  /**
+   * If the main component in a JSX or TSX module returns a JSX element
+   * with a tag name in the given `scopeTags` array, its `className` prop
+   * will be edited **instead** of being wrapped with a scope element.
+   *
+   * In other words, the root JSX element *becomes* the scope element
+   * if its element type exists in `scopeTags`. Composite elements
+   * (eg: capitalized) are valid in here, too.
+   */
+  scopeTags?: string[]
 }
 
 export default (options: Options = {}): vite.Plugin => {
@@ -21,6 +31,7 @@ export default (options: Options = {}): vite.Plugin => {
   const postcssPlugin = getPostcssPlugin()
   const babelPlugin = getBabelPlugin(
     options.scopeTag || 'div',
+    options.scopeTags || [],
     () => projectRoot,
     dirCache
   )

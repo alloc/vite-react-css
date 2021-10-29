@@ -7,6 +7,7 @@ import { extensionRE, reactExtensionRE, styleExtensionRE } from './regex'
 export const getBabelPlugin =
   (
     scopeTag: string,
+    scopeTags: string[],
     getProjectRoot: () => string,
     dirCache: Record<string, string[]>
   ) =>
@@ -49,24 +50,70 @@ export const getBabelPlugin =
             return debug(`Main component not found: "${state.filename}"`)
           }
 
+          const scopeClasses = `scoped ${scopeId}`
+          const addScopeClasses = (
+            prevNode:
+              | babel.types.StringLiteral
+              | babel.types.JSXExpressionContainer
+          ) =>
+            t.isStringLiteral(prevNode)
+              ? t.stringLiteral(prevNode.value + ' ' + scopeClasses)
+              : t.jsxExpressionContainer(
+                  t.binaryExpression(
+                    '+',
+                    t.logicalExpression(
+                      '||',
+                      prevNode.expression as any,
+                      t.stringLiteral('')
+                    ),
+                    t.stringLiteral(scopeClasses)
+                  )
+                )
+
           let transformed = false
           const transformJSX = (path: babel.NodePath) =>
             path.traverse({
               JSXElement(jsxElem) {
-                transformed = true
                 jsxElem.skip()
-                jsxElem.replaceWith(
-                  t.jsxElement(
-                    t.jsxOpeningElement(t.jsxIdentifier(scopeTag), [
-                      t.jsxAttribute(
-                        t.jsxIdentifier('className'),
-                        t.stringLiteral(`scoped ${scopeId}`)
-                      ),
-                    ]),
-                    t.jsxClosingElement(t.jsxIdentifier(scopeTag)),
-                    [t.cloneNode(jsxElem.node)]
+
+                const tagName = jsxElem
+                  .get('openingElement')
+                  .get('name')
+                  .toString()
+
+                if (scopeTags.includes(tagName)) {
+                  const { attributes } = jsxElem.get('openingElement').node
+                  for (let i = 0; i < attributes.length; i++) {
+                    const attr = attributes[i]
+                    if (!t.isJSXAttribute(attr)) continue
+                    if (t.isJSXIdentifier(attr.name, { name: 'className' })) {
+                      transformed = true
+                      attr.value = addScopeClasses(attr.value as any)
+                      return
+                    }
+                  }
+                  transformed = true
+                  attributes.push(
+                    t.jsxAttribute(
+                      t.jsxIdentifier('className'),
+                      t.stringLiteral(scopeClasses)
+                    )
                   )
-                )
+                } else {
+                  transformed = true
+                  jsxElem.replaceWith(
+                    t.jsxElement(
+                      t.jsxOpeningElement(t.jsxIdentifier(scopeTag), [
+                        t.jsxAttribute(
+                          t.jsxIdentifier('className'),
+                          t.stringLiteral(scopeClasses)
+                        ),
+                      ]),
+                      t.jsxClosingElement(t.jsxIdentifier(scopeTag)),
+                      [t.cloneNode(jsxElem.node)]
+                    )
+                  )
+                }
               },
             })
 
