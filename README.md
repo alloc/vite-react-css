@@ -42,6 +42,12 @@ For selectors without `:scope` in them, the unique scope class is prepended. One
 
 The `.scoped` class can be used within your global CSS to customize all scope elements at once.
 
+### Scope elements
+
+By default, a "scope element" is inserted wherever your main React component returns a JSX element. It wraps your JSX element, has the `scoped` and `{scopeId}` CSS classes, and uses the `scopeTag` option as its element type.
+
+If you define the `scopeTags` option (notice it's plural), you can instruct `vite-react-css` to inject the `scoped` and `{scopeId}` class names into your root JSX elements, instead of inserting a scope element. For example, if `scopeTags: ["div"]` is used, and your main React component returns a `<div>` as its root element, that element will have the scope classes added to its `className` prop (or the `className` prop will be added if undefined). Any element type is valid in `scopeTags`, but make sure it can handle the `className` prop.
+
 &nbsp;
 
 ### Quirks
