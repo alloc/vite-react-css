@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getBabelPlugin main component can be a named export if named after file basename 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export const Foo = wrap(() => <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>);",
+]
+`;
+
+exports[`getBabelPlugin main component can be default export as HOC-wrapped function 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default wrap(() => <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>);",
+]
+`;
+
+exports[`getBabelPlugin main component can be default export as arrow function 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (() => <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>);",
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (() => {
+  return <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>;
+});",
+]
+`;
+
+exports[`getBabelPlugin main component can be default export as function declaration 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default function Foo() {
+  return <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>;
+}",
+]
+`;
+
+exports[`getBabelPlugin main component can be default export as identifier 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+
+const Foo = () => <div className=\\"scoped s0c05f480\\"><span>Hello world</span></div>;
+
+export default Foo;",
+]
+`;
+
+exports[`getBabelPlugin scopeTags adds a className attribute otherwise 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (() => <Box className=\\"scoped s0c05f480\\" />);",
+]
+`;
+
+exports[`getBabelPlugin scopeTags does not account for spread attributes 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (() => <Box {...props} className=\\"scoped s0c05f480\\" />);",
+]
+`;
+
+exports[`getBabelPlugin scopeTags mutates the className attribute if one exists 1`] = `
+Array [
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (() => <Box className=\\"Foo scoped s0c05f480\\" />);",
+  "import \\"./Foo.css?scoped=s0c05f480\\";
+export default (props => <Box className={(props.className || \\"\\") + \\" scoped s0c05f480\\"} />);",
+]
+`;

@@ -65,23 +65,21 @@ export const getBabelPlugin =
                       prevNode.expression as any,
                       t.stringLiteral('')
                     ),
-                    t.stringLiteral(scopeClasses)
+                    t.stringLiteral(' ' + scopeClasses)
                   )
                 )
 
           let transformed = false
           const transformJSX = (path: babel.NodePath) =>
             path.traverse({
-              JSXElement(jsxElem) {
+              JSXOpeningElement(jsxOpenElem) {
+                const jsxElem =
+                  jsxOpenElem.parentPath as babel.NodePath<babel.types.JSXElement>
                 jsxElem.skip()
 
-                const tagName = jsxElem
-                  .get('openingElement')
-                  .get('name')
-                  .toString()
-
+                const tagName = jsxOpenElem.get('name').toString()
                 if (scopeTags.includes(tagName)) {
-                  const { attributes } = jsxElem.get('openingElement').node
+                  const { attributes } = jsxOpenElem.node
                   for (let i = 0; i < attributes.length; i++) {
                     const attr = attributes[i]
                     if (!t.isJSXAttribute(attr)) continue
@@ -116,7 +114,7 @@ export const getBabelPlugin =
               },
             })
 
-          if (mainComponent.isArrowFunctionExpression({ expression: true })) {
+          if (isArrowExpression(mainComponent)) {
             transformJSX(mainComponent.get('body'))
           } else {
             mainComponent.traverse({
@@ -189,13 +187,11 @@ function coerceToComponent(expr: babel.NodePath): babel.NodePath | undefined {
   } else if (expr.isIdentifier()) {
     const binding = expr.scope.getBinding(expr.node.name)
     if (binding) {
-      if (isFunction(binding.path)) {
-        return binding.path
-      }
-      const { parentPath } = binding.path
-      if (parentPath?.isVariableDeclarator()) {
-        return coerceToComponent(parentPath.get('init') as any)
-      }
+      return coerceToComponent(
+        binding.path.isVariableDeclarator()
+          ? binding.path.parentPath!
+          : binding.path
+      )
     }
   }
 }
@@ -205,3 +201,8 @@ const isFunction = (
 ): path is babel.NodePath<
   babel.types.FunctionDeclaration | babel.types.ArrowFunctionExpression
 > => path.isFunctionDeclaration() || path.isArrowFunctionExpression()
+
+const isArrowExpression = (
+  path: babel.NodePath
+): path is babel.NodePath<babel.types.ArrowFunctionExpression> =>
+  path.isArrowFunctionExpression() && path.get('body').isExpression()

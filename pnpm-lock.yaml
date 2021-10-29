@@ -2,6 +2,8 @@ lockfileVersion: 5.3
 
 specifiers:
   '@alloc/prettier-config': ^1.0.0
+  '@babel/core': ^7.15.8
+  '@types/babel__core': ^7.1.16
   '@types/debug': ^4.1.7
   '@types/jest': ^27.0.2
   '@types/react': ^17.0.33
@@ -24,6 +26,8 @@ dependencies:
 
 devDependencies:
   '@alloc/prettier-config': 1.0.0
+  '@babel/core': 7.15.8
+  '@types/babel__core': 7.1.16
   '@types/debug': 4.1.7
   '@types/jest': 27.0.2
   '@types/react': 17.0.33
