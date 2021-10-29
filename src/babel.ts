@@ -1,3 +1,4 @@
+import type { types as t } from '@babel/core'
 import * as path from 'path'
 import md5Hex = require('md5-hex')
 import { debug } from './debug'
@@ -28,7 +29,7 @@ export const getBabelPlugin =
               stmt.isExportDefaultDeclaration() ||
               (stmt.isExportNamedDeclaration() &&
                 isExportedIdent(stmt.get('declaration') as any, defaultId))
-          ) as babel.NodePath<babel.types.ExportDefaultDeclaration>
+          ) as babel.NodePath<t.ExportDefaultDeclaration>
 
         if (defaultExport) {
           const relativeStylePath = path.relative(getProjectRoot(), stylePath)
@@ -51,9 +52,7 @@ export const getBabelPlugin =
 
           const scopeClasses = `scoped ${scopeId}`
           const addScopeClasses = (
-            prevNode:
-              | babel.types.StringLiteral
-              | babel.types.JSXExpressionContainer
+            prevNode: t.StringLiteral | t.JSXExpressionContainer
           ) =>
             t.isStringLiteral(prevNode)
               ? t.stringLiteral(prevNode.value + ' ' + scopeClasses)
@@ -72,7 +71,7 @@ export const getBabelPlugin =
           let transformed = false
           const transformReturn = (path: babel.NodePath) => {
             const transformElement = (
-              jsxElem: babel.NodePath<babel.types.JSXElement>
+              jsxElem: babel.NodePath<t.JSXElement>
             ) => {
               // Only transform root-level JSX elements.
               jsxElem.skip()
@@ -174,7 +173,7 @@ function getStyleFilename(
 }
 
 function isExportedIdent(decl: babel.NodePath, name: string) {
-  let ident: babel.NodePath<babel.types.Identifier>
+  let ident: babel.NodePath<t.Identifier>
   if (decl.isVariableDeclaration()) {
     ident = decl.get('declarations')[0].get('id') as any
   } else if (decl.isFunctionDeclaration()) {
@@ -211,11 +210,10 @@ function coerceToComponent(expr: babel.NodePath): babel.NodePath | undefined {
 
 const isFunction = (
   path: babel.NodePath
-): path is babel.NodePath<
-  babel.types.FunctionDeclaration | babel.types.ArrowFunctionExpression
-> => path.isFunctionDeclaration() || path.isArrowFunctionExpression()
+): path is babel.NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression> =>
+  path.isFunctionDeclaration() || path.isArrowFunctionExpression()
 
 const isArrowExpression = (
   path: babel.NodePath
-): path is babel.NodePath<babel.types.ArrowFunctionExpression> =>
+): path is babel.NodePath<t.ArrowFunctionExpression> =>
   path.isArrowFunctionExpression() && path.get('body').isExpression()
