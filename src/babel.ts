@@ -12,6 +12,7 @@ export const getBabelPlugin =
     dirCache: Record<string, string[]>
   ) =>
   ({ types: t }: typeof import('@babel/core')): babel.PluginObj => ({
+    name: 'vite-react-css',
     visitor: {
       Program(program, state) {
         const stylePath = getStyleFilename(state.filename, dirCache)
