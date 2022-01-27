@@ -41,8 +41,10 @@ export default (options: Options = {}): vite.Plugin => {
   return {
     name: 'vite-react-css:babel',
     enforce: 'pre',
-    babel: {
-      plugins: [babelPlugin],
+    api: {
+      reactBabel({ plugins }) {
+        plugins.push(babelPlugin)
+      },
     },
     config: () => ({
       css: { postcss: { plugins: [postcssPlugin as any] } },
