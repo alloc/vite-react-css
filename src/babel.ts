@@ -15,6 +15,7 @@ export const getBabelPlugin =
     name: 'vite-react-css',
     visitor: {
       Program(program, state) {
+        if (!state.filename) return
         const stylePath = getStyleFilename(state.filename, dirCache)
         if (!stylePath) return
         debug(`Found styles: "${stylePath}"`)
