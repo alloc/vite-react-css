@@ -19,6 +19,10 @@ export const getPostcssPlugin = (): PostcssPlugin => ({
       let transform: parseSelector.SyncProcessor
 
       const rawSelector = rule.selector
+      if (rawSelector.endsWith('%')) {
+        return // Keyframe
+      }
+
       if (scopePseudoRE.test(rawSelector)) {
         transform = root => {
           root.walk(node => {
