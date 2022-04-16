@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as vite from 'vite'
 import '@vitejs/plugin-react'
+import { reactExtensionRE, styleExtensionRE } from './regex'
 import { getPostcssPlugin } from './postcss'
 import { getBabelPlugin } from './babel'
 import { cacheOnDemand } from './utils'
@@ -27,15 +28,19 @@ type Options = {
 }
 
 export default (options: Options = {}): vite.Plugin => {
-  const dirCache: Record<string, string[]> = {}
   let projectRoot: string
+
+  const dirCache = cacheOnDemand(
+    {} as Record<string, string[]>, //
+    dir => fs.readdirSync(dir)
+  )
 
   const postcssPlugin = getPostcssPlugin()
   const babelPlugin = getBabelPlugin(
     options.scopeType || 'div',
     options.scopeTags || [],
     () => projectRoot,
-    cacheOnDemand(dirCache, dir => fs.readdirSync(dir))
+    dirCache
   )
 
   return {
@@ -60,7 +65,24 @@ export default (options: Options = {}): vite.Plugin => {
     },
     configureServer(server) {
       server.watcher?.on('all', (event, id) => {
-        delete dirCache[path.dirname(id)]
+        const dir = path.dirname(id)
+        delete dirCache[dir]
+
+        if (
+          (event == 'add' || event == 'unlink') &&
+          styleExtensionRE.test(id)
+        ) {
+          const rawId = id.replace(styleExtensionRE, '')
+          const name = path.basename(rawId)
+          const reactFile = dirCache[dir].find(
+            file =>
+              reactExtensionRE.test(file) &&
+              name == file.replace(reactExtensionRE, '')
+          )
+          if (reactFile) {
+            server.watcher!.emit('change', reactFile)
+          }
+        }
       })
     },
   }
