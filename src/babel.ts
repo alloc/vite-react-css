@@ -22,7 +22,14 @@ export const getBabelPlugin =
 
         // If no default export exists, we check for a named export
         // whose identifier matches the file basename.
-        const defaultId = path.basename(stylePath, path.extname(stylePath))
+        const rootIdents: string[] = []
+        for (
+          let filePath = stylePath.replace(/\.[^./]+$/, '');
+          /^[A-Z]/.test(path.basename(filePath));
+          filePath = path.dirname(filePath)
+        ) {
+          rootIdents.unshift(path.basename(filePath) + (rootIdents[0] || ''))
+        }
 
         const defaultExport = program
           .get('body')
@@ -30,7 +37,7 @@ export const getBabelPlugin =
             stmt =>
               stmt.isExportDefaultDeclaration() ||
               (stmt.isExportNamedDeclaration() &&
-                isExportedIdent(stmt.get('declaration') as any, defaultId))
+                isExportedIdent(stmt.get('declaration') as any, rootIdents))
           ) as babel.NodePath<t.ExportDefaultDeclaration>
 
         if (defaultExport) {
@@ -192,7 +199,7 @@ function getStyleFilename(
   }
 }
 
-function isExportedIdent(decl: babel.NodePath, name: string) {
+function isExportedIdent(decl: babel.NodePath, names: string[]) {
   let ident: babel.NodePath<t.Identifier>
   if (decl.isVariableDeclaration()) {
     ident = decl.get('declarations')[0].get('id') as any
@@ -201,7 +208,7 @@ function isExportedIdent(decl: babel.NodePath, name: string) {
   } else {
     return false
   }
-  return ident.node.name === name
+  return names.includes(ident.node.name)
 }
 
 function coerceToComponent(expr: babel.NodePath): babel.NodePath | undefined {
