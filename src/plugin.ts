@@ -32,7 +32,13 @@ export default (options: Options = {}): vite.Plugin => {
 
   const dirCache = cacheOnDemand(
     {} as Record<string, string[]>, //
-    dir => fs.readdirSync(dir)
+    dir => {
+      try {
+        return fs.readdirSync(dir)
+      } catch {
+        return []
+      }
+    }
   )
 
   const postcssPlugin = getPostcssPlugin()
