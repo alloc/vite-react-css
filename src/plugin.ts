@@ -71,15 +71,16 @@ export default (options: Options = {}): vite.Plugin => {
     },
     configureServer(server) {
       server.watcher?.on('all', (event, id) => {
-        const dir = path.dirname(id)
-        delete dirCache[dir]
-
         if (
           (event == 'add' || event == 'unlink') &&
           styleExtensionRE.test(id)
         ) {
           const rawId = id.replace(styleExtensionRE, '')
           const name = path.basename(rawId)
+          const dir = path.dirname(id)
+          if (event == 'add') {
+            delete dirCache[dir]
+          }
           const reactFile = dirCache[dir].find(
             file =>
               reactExtensionRE.test(file) &&
@@ -87,6 +88,9 @@ export default (options: Options = {}): vite.Plugin => {
           )
           if (reactFile) {
             server.watcher!.emit('change', reactFile)
+          }
+          if (event == 'unlink') {
+            delete dirCache[dir]
           }
         }
       })
